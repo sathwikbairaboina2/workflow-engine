@@ -1,0 +1,33 @@
+# Demo: wfd on host port 5400 (ADR 0007) plus two transfer workers sharing a ledger volume.
+name: workflow-engine
+
+services:
+  wfd:
+    build: { context: .., dockerfile: Dockerfile }
+    image: workflow-engine:dev
+    command: ["/wfd", "--listen", ":7233", "--db", "/data/wf.db", "--wft-timeout", "3s"]
+    ports: ["${WF_PORT:-5400}:7233"]
+    volumes: ["wf-data:/data"]
+    healthcheck:
+      test: ["CMD", "/wf", "--server", "http://localhost:7233", "health"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  worker:
+    image: workflow-engine:dev
+    command: ["/transfer-worker", "run", "--server", "http://wfd:7233", "--ledger", "/ledger/ledger.db",
+              "--queue", "transfers", "--activity-delay", "500ms"]
+    depends_on:
+      wfd: { condition: service_healthy }
+    volumes: ["ledger:/ledger"]
+    deploy: { replicas: 2 }
+
+  cli:
+    image: workflow-engine:dev
+    profiles: ["cli"]
+    entrypoint: ["/wf", "--server", "http://wfd:7233"]
+
+volumes:
+  wf-data: {}
+  ledger: {}
