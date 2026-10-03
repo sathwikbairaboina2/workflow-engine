@@ -156,3 +156,62 @@ func (e *Engine) History(ctx context.Context, req wire.HistoryRequest) (wire.His
 	})
 	return out, err
 }
+
+// SignalWorkflow delivers a signal to the open run of a workflow id.
+func (e *Engine) SignalWorkflow(ctx context.Context, req wire.SignalRequest) error {
+	if req.WorkflowID == "" || req.Name == "" {
+		return invalid("workflow_id and name are required")
+	}
+	if req.Payload.Size() > e.cfg.MaxPayloadBytes {
+		return tooLarge()
+	}
+	return e.deliverToOpenRun(ctx, "signal", req.WorkflowID, func(now int64) store.NewEvent {
+		return store.NewEvent{Type: wire.WorkflowExecutionSignaled, Time: now,
+			Attrs: wire.WorkflowExecutionSignaledAttrs{Name: req.Name, Payload: req.Payload}}
+	})
+}
+
+// CancelWorkflow records a cancellation request; the workflow decides when to close as canceled.
+func (e *Engine) CancelWorkflow(ctx context.Context, req wire.CancelRequest) error {
+	if req.WorkflowID == "" {
+		return invalid("workflow_id is required")
+	}
+	return e.deliverToOpenRun(ctx, "cancel", req.WorkflowID, func(now int64) store.NewEvent {
+		return store.NewEvent{Type: wire.WorkflowExecutionCancelRequested, Time: now,
+			Attrs: wire.WorkflowExecutionCancelRequestedAttrs{Reason: req.Reason}}
+	})
+}
+
+func (e *Engine) deliverToOpenRun(ctx context.Context, kind, workflowID string, mk func(now int64) store.NewEvent) error {
+	var notify string
+	var postErr error
+	err := e.transition(ctx, kind, func(tx *store.Tx, now int64) (bool, error) {
+		notify, postErr = "", nil
+		run, ok, err := tx.GetOpenRun(workflowID)
+		if err != nil {
+			return false, err
+		}
+		if !ok {
+			latest, found, err := tx.GetLatestRun(workflowID)
+			if err != nil {
+				return false, err
+			}
+			if found {
+				return false, &Error{Code: CodeRunClosed, Message: "workflow run is closed", RunID: latest.RunID}
+			}
+			return false, &Error{Code: CodeNotFound, Message: "workflow not found"}
+		}
+		sched, err := e.deliver(tx, run, now, []store.NewEvent{mk(now)})
+		if sched {
+			notify = wfKey(run.TaskQueue)
+		}
+		return true, err
+	})
+	if err != nil {
+		return err
+	}
+	if notify != "" {
+		e.notify.broadcast(notify)
+	}
+	return postErr
+}
