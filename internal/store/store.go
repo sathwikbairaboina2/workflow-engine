@@ -98,3 +98,9 @@ func (s *Store) WithTx(ctx context.Context, name string, fn func(*Tx) error) (er
 	}
 	return nil
 }
+
+// View runs a read-only unit of work. It uses the same transaction machinery as WithTx, so it sees one
+// consistent snapshot; the "view" name keeps it out of the failpoint set used by the crash tests.
+func (s *Store) View(ctx context.Context, fn func(*Tx) error) error {
+	return s.WithTx(ctx, "view", fn)
+}
