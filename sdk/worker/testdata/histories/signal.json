@@ -1,0 +1,91 @@
+[
+  {
+    "event_id": 1,
+    "type": "WorkflowExecutionStarted",
+    "ts": 1791069136228,
+    "attrs": {
+      "workflow_id": "golden",
+      "workflow_type": "signal",
+      "task_queue": "q",
+      "input": {
+        "encoding": "json",
+        "data": 0
+      }
+    }
+  },
+  {
+    "event_id": 2,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069136228,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 3,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069136287,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 4,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069136619,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "started_event_id": 3
+    }
+  },
+  {
+    "event_id": 5,
+    "type": "WorkflowExecutionSignaled",
+    "ts": 1791069136736,
+    "attrs": {
+      "name": "go",
+      "payload": {
+        "encoding": "json",
+        "data": "payload"
+      }
+    }
+  },
+  {
+    "event_id": 6,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069136736,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 7,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069136854,
+    "attrs": {
+      "scheduled_event_id": 6,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 8,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069137035,
+    "attrs": {
+      "scheduled_event_id": 6,
+      "started_event_id": 7
+    }
+  },
+  {
+    "event_id": 9,
+    "type": "WorkflowExecutionCompleted",
+    "ts": 1791069137035,
+    "attrs": {
+      "result": {
+        "encoding": "json",
+        "data": "payload"
+      }
+    }
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "event_id": 1,
+    "type": "WorkflowExecutionStarted",
+    "ts": 1791069137673,
+    "attrs": {
+      "workflow_id": "golden",
+      "workflow_type": "cancel",
+      "task_queue": "q",
+      "input": {
+        "encoding": "json",
+        "data": 0
+      }
+    }
+  },
+  {
+    "event_id": 2,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069137673,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 3,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069137907,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 4,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069138004,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "started_event_id": 3
+    }
+  },
+  {
+    "event_id": 5,
+    "type": "TimerStarted",
+    "ts": 1791069138004,
+    "attrs": {
+      "seq": 1,
+      "duration_ms": 3600000,
+      "fire_at": 1791072738004
+    }
+  },
+  {
+    "event_id": 6,
+    "type": "WorkflowExecutionCancelRequested",
+    "ts": 1791069138136,
+    "attrs": {
+      "reason": "golden"
+    }
+  },
+  {
+    "event_id": 7,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069138136,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 8,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069138232,
+    "attrs": {
+      "scheduled_event_id": 7,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 9,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069138256,
+    "attrs": {
+      "scheduled_event_id": 7,
+      "started_event_id": 8
+    }
+  },
+  {
+    "event_id": 10,
+    "type": "WorkflowExecutionCanceled",
+    "ts": 1791069138256,
+    "attrs": {}
+  }
+]

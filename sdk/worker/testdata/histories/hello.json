@@ -1,0 +1,122 @@
+[
+  {
+    "event_id": 1,
+    "type": "WorkflowExecutionStarted",
+    "ts": 1791069130742,
+    "attrs": {
+      "workflow_id": "golden",
+      "workflow_type": "hello",
+      "task_queue": "q",
+      "input": {
+        "encoding": "json",
+        "data": "ada"
+      }
+    }
+  },
+  {
+    "event_id": 2,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069130742,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 3,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069131099,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 4,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069131565,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "started_event_id": 3
+    }
+  },
+  {
+    "event_id": 5,
+    "type": "ActivityTaskScheduled",
+    "ts": 1791069131565,
+    "attrs": {
+      "seq": 1,
+      "activity_type": "Greet",
+      "task_queue": "q",
+      "input": {
+        "encoding": "json",
+        "data": "ada"
+      },
+      "retry_policy": {
+        "initial_ms": 0,
+        "backoff": 0,
+        "max_ms": 0,
+        "max_attempts": 0
+      },
+      "start_to_close_ms": 5000
+    }
+  },
+  {
+    "event_id": 6,
+    "type": "ActivityTaskStarted",
+    "ts": 1791069131752,
+    "attrs": {
+      "scheduled_event_id": 5,
+      "attempt": 1,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 7,
+    "type": "ActivityTaskCompleted",
+    "ts": 1791069131752,
+    "attrs": {
+      "scheduled_event_id": 5,
+      "result": {
+        "encoding": "json",
+        "data": "hello, ada"
+      }
+    }
+  },
+  {
+    "event_id": 8,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069131752,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 9,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069132035,
+    "attrs": {
+      "scheduled_event_id": 8,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 10,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069132278,
+    "attrs": {
+      "scheduled_event_id": 8,
+      "started_event_id": 9
+    }
+  },
+  {
+    "event_id": 11,
+    "type": "WorkflowExecutionCompleted",
+    "ts": 1791069132278,
+    "attrs": {
+      "result": {
+        "encoding": "json",
+        "data": "hello, ada"
+      }
+    }
+  }
+]

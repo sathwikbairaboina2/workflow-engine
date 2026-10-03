@@ -1,0 +1,110 @@
+[
+  {
+    "event_id": 1,
+    "type": "WorkflowExecutionStarted",
+    "ts": 1791069139284,
+    "attrs": {
+      "workflow_id": "golden",
+      "workflow_type": "sideeffect",
+      "task_queue": "q",
+      "input": {
+        "encoding": "json",
+        "data": 0
+      }
+    }
+  },
+  {
+    "event_id": 2,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069139284,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 3,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069139365,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 4,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069139624,
+    "attrs": {
+      "scheduled_event_id": 2,
+      "started_event_id": 3
+    }
+  },
+  {
+    "event_id": 5,
+    "type": "MarkerRecorded",
+    "ts": 1791069139624,
+    "attrs": {
+      "seq": 1,
+      "kind": "side_effect",
+      "value": {
+        "encoding": "json",
+        "data": "29d2c9c76309bff2"
+      }
+    }
+  },
+  {
+    "event_id": 6,
+    "type": "TimerStarted",
+    "ts": 1791069139624,
+    "attrs": {
+      "seq": 2,
+      "duration_ms": 10,
+      "fire_at": 1791069139634
+    }
+  },
+  {
+    "event_id": 7,
+    "type": "TimerFired",
+    "ts": 1791069139726,
+    "attrs": {
+      "started_event_id": 6
+    }
+  },
+  {
+    "event_id": 8,
+    "type": "WorkflowTaskScheduled",
+    "ts": 1791069139726,
+    "attrs": {
+      "attempt": 1
+    }
+  },
+  {
+    "event_id": 9,
+    "type": "WorkflowTaskStarted",
+    "ts": 1791069139949,
+    "attrs": {
+      "scheduled_event_id": 8,
+      "identity": "test"
+    }
+  },
+  {
+    "event_id": 10,
+    "type": "WorkflowTaskCompleted",
+    "ts": 1791069140065,
+    "attrs": {
+      "scheduled_event_id": 8,
+      "started_event_id": 9
+    }
+  },
+  {
+    "event_id": 11,
+    "type": "WorkflowExecutionCompleted",
+    "ts": 1791069140065,
+    "attrs": {
+      "result": {
+        "encoding": "json",
+        "data": "29d2c9c76309bff2"
+      }
+    }
+  }
+]
