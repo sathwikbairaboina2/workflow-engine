@@ -19,6 +19,7 @@ func (e *Engine) appendEvents(tx *store.Tx, run store.Workflow, now int64, evs [
 		if err := tx.CloseRun(run.RunID, "failed", nil, &f, now); err != nil {
 			return 0, false, err
 		}
+		e.m.WorkflowClosed("failed")
 		if err := tx.DeleteRunTasksTimersBuffer(run.RunID); err != nil {
 			return 0, false, err
 		}

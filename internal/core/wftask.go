@@ -147,6 +147,7 @@ func (e *Engine) CompleteWorkflowTask(ctx context.Context, req wire.CompleteWork
 			if err := tx.CloseRun(run.RunID, status, result, failure, now); err != nil {
 				return false, err
 			}
+			e.m.WorkflowClosed(status)
 			return true, tx.DeleteRunTasksTimersBuffer(run.RunID)
 		}
 		for i, c := range cmds {
@@ -226,6 +227,7 @@ func (e *Engine) FailWorkflowTask(ctx context.Context, req wire.FailWorkflowTask
 // failWorkflowTask appends WorkflowTaskFailed, the buffered events and WorkflowTaskScheduled{attempt+1},
 // then replaces the task row so it becomes visible after delay. No command events are appended.
 func (e *Engine) failWorkflowTask(tx *store.Tx, run store.Workflow, task store.Task, now int64, cause, message string, delay time.Duration) error {
+	e.m.WorkflowTaskFailed(cause)
 	buffered, err := tx.TakeBufferedEvents(run.RunID)
 	if err != nil {
 		return err

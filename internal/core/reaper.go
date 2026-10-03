@@ -35,6 +35,7 @@ func (e *Engine) ReapExpiredLeases(ctx context.Context) (int, error) {
 				return false, err
 			}
 			did = true
+			e.m.LeaseExpired(cur.Kind)
 			if !ok || run.Status != "running" {
 				return true, tx.DeleteTask(cur.TaskID)
 			}

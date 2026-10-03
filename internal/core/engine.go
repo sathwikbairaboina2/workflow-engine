@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sathwikbairaboina2/workflow-engine/internal/clock"
+	"github.com/sathwikbairaboina2/workflow-engine/internal/metrics"
 	"github.com/sathwikbairaboina2/workflow-engine/internal/store"
 )
 
@@ -48,6 +49,9 @@ func WithObserver(f func(kind string, d time.Duration)) Option {
 	return func(e *Engine) { e.obs = f }
 }
 
+// WithMetrics attaches Prometheus metrics; a nil value disables them.
+func WithMetrics(m *metrics.Metrics) Option { return func(e *Engine) { e.m = m } }
+
 // Engine executes state transitions against the store.
 type Engine struct {
 	st     *store.Store
@@ -55,6 +59,7 @@ type Engine struct {
 	cfg    Config
 	notify *notifier
 	obs    func(string, time.Duration)
+	m      *metrics.Metrics
 }
 
 // New builds an engine.
@@ -103,8 +108,12 @@ func (e *Engine) transition(ctx context.Context, kind string, fn func(tx *store.
 	if err != nil {
 		return err
 	}
-	if changed && e.obs != nil {
-		e.obs(kind, time.Since(begin))
+	if changed {
+		d := time.Since(begin)
+		e.m.ObserveTransition(kind, d)
+		if e.obs != nil {
+			e.obs(kind, d)
+		}
 	}
 	return nil
 }

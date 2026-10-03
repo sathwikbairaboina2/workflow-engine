@@ -163,6 +163,7 @@ func (e *Engine) failActivity(tx *store.Tx, run store.Workflow, task store.Task,
 		}
 	}
 	if again, delay := retry.Next(sched.RetryPolicy, task.Attempt, f); again {
+		e.m.ActivityRetry()
 		return false, tx.RetryTask(task.TaskID, task.Attempt+1, now+delay.Milliseconds())
 	}
 	if err := tx.DeleteTask(task.TaskID); err != nil {
