@@ -1,0 +1,6 @@
+.git
+docs
+bench/results
+*.md
+.superpowers
+chaos-out

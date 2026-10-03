@@ -2,3 +2,12 @@
 .env.*
 !.env.example
 .superpowers/
+/wfd
+/wf
+/dist/
+*.test
+*.out
+*.db
+*.db-wal
+*.db-shm
+/chaos-out/
