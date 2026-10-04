@@ -1,0 +1,40 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: gofmt
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./...
+      - name: wfcheck
+        run: go run ./cmd/wfcheck ./examples/... ./sdk/worker/...
+      - run: go test -race ./...
+      - name: chaos soak (short)
+        if: github.event_name != 'schedule'
+        run: |
+          go build -o /tmp/bin/ ./cmd/wfd ./examples/transfer/cmd/transfer-worker
+          go run ./cmd/chaos --bin-dir /tmp/bin --work-dir /tmp/chaos --workflows 100 --kills 50 --seed ${{ github.run_number }} --out chaos.json
+      - name: chaos soak (nightly)
+        if: github.event_name == 'schedule'
+        run: |
+          go build -o /tmp/bin/ ./cmd/wfd ./examples/transfer/cmd/transfer-worker
+          go run ./cmd/chaos --bin-dir /tmp/bin --work-dir /tmp/chaos --workflows 2000 --kills 600 --seed ${{ github.run_number }} --out chaos.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: chaos-report
+          path: |
+            chaos.json
+            /tmp/chaos/*.log
+          if-no-files-found: ignore
+      - run: docker build -t workflow-engine:ci .
