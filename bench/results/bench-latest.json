@@ -1,0 +1,19 @@
+{
+  "workflows": 2000,
+  "completed": 2000,
+  "wall_s": 17.064,
+  "workflows_per_s": 117.20581340834505,
+  "transitions": 12000,
+  "transitions_per_s": 703.2348804500704,
+  "transition_p50_ms": 8.401,
+  "transition_p99_ms": 81.683,
+  "workflow_e2e_p50_ms": 13953,
+  "workflow_e2e_p99_ms": 15177,
+  "go_version": "go1.26.8",
+  "goos": "linux",
+  "goarch": "amd64",
+  "num_cpu": 24,
+  "store": "sqlite WAL synchronous=FULL, database on tmpfs (RAM disk, fsync is nearly free)",
+  "note": "Docker Desktop on Windows 11; server, workers and load generator in one container",
+  "started_at": "2026-10-04T00:35:20Z"
+}

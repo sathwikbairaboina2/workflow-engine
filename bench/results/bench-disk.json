@@ -1,0 +1,19 @@
+{
+  "workflows": 150,
+  "completed": 150,
+  "wall_s": 89.788,
+  "workflows_per_s": 1.6706018621642091,
+  "transitions": 900,
+  "transitions_per_s": 10.023611172985255,
+  "transition_p50_ms": 199.274,
+  "transition_p99_ms": 2583.977,
+  "workflow_e2e_p50_ms": 75124,
+  "workflow_e2e_p99_ms": 79980,
+  "go_version": "go1.26.8",
+  "goos": "linux",
+  "goarch": "amd64",
+  "num_cpu": 24,
+  "store": "sqlite WAL synchronous=FULL, database on container disk (fsync goes to Docker Desktop's virtual disk)",
+  "note": "Docker Desktop on Windows 11; server, workers and load generator in one container",
+  "started_at": "2026-10-04T00:35:48Z"
+}
