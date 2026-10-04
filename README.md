@@ -2,9 +2,7 @@
 
 > Durable workflow engine. Workflows as plain Go code, event-sourced in SQLite, replayed after any crash.
 
-A small durable workflow engine in Go. You write a workflow as ordinary Go code; the server stores an
-event-sourced history in SQLite, and workers rebuild the workflow's state by replaying that history, so a
-`kill -9` of any process loses nothing.
+**0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 81.7 ms per transition.**
 
 <!-- readme-header -->
 [![CI](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml) ![Go](https://img.shields.io/badge/-Go-555) ![SQLite](https://img.shields.io/badge/-SQLite-555)
@@ -14,9 +12,11 @@ event-sourced history in SQLite, and workers rebuild the workflow's state by rep
 | **0 lost / 200 kill -9** | `bench/results/` |
 | **703 transitions/s** | `bench/results/` |
 
-**0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 81.7 ms per transition.**
+A small durable workflow engine in Go. You write a workflow as ordinary Go code; the server stores an
+event-sourced history in SQLite, and workers rebuild the workflow's state by replaying that history, so a
+`kill -9` of any process loses nothing.
 
-Read the last number with its conditions: it was measured with the database on tmpfs, where `fsync` is nearly
+Read the throughput figure with its conditions: it was measured with the database on tmpfs, where `fsync` is nearly
 free, so it is the engine's ceiling. On this machine's Docker Desktop disk the same engine did 10
 transitions/s with a p50 of 199 ms per transition, because every commit waits for a real `fsync` (see
 [Benchmark](#benchmark)). `kill -9` does not lose the kernel page cache, so the chaos soak proves the same
@@ -52,7 +52,7 @@ sh scripts/chaos.sh --workflows 100 --kills 50 --seed 1   # the chaos report abo
 
 ## Install
 
-Once this repository is pushed to GitHub these work (until then, build from a checkout):
+Go 1.26+ for the SDK and binaries, or build the image with Docker:
 
 ```sh
 go get github.com/sathwikbairaboina2/workflow-engine/sdk/...
@@ -90,8 +90,15 @@ func Transfer(ctx workflow.Context, in Input) (string, error) {
 ```
 
 The ledger honours `activity.GetInfo(ctx).IdempotencyKey`, which is the same on every retry of one scheduled
-activity, so an activity that runs twice writes once. `go run ./cmd/wfcheck ./...` flags `time.Now`, `math/rand`,
-`go` and `select` inside workflow functions.
+activity, so an activity that runs twice writes once. `go run ./cmd/wfcheck ./...` flags `time.Now`, `time.Sleep`,
+`math/rand`, `go` and `select` inside workflow functions.
+
+## Configuration
+
+`wfd` takes flags, not env vars: `-listen` (default `:7233`), `-db` (default `wf.db`), `-wft-timeout`, `-poll-timeout`,
+`-timer-interval`, `-reaper-interval`, `-max-history-events` (default 50000) and `-max-payload-bytes` (default 2 MiB).
+The `wf` CLI talks to `WF_SERVER` or `--server` (default `http://localhost:5400`, the port the Docker compose file
+publishes; `WF_PORT` changes it).
 
 ## Architecture
 
