@@ -1,8 +1,18 @@
-# workflow-engine
+# ♻️ workflow-engine
+
+> Durable workflow engine. Workflows as plain Go code, event-sourced in SQLite, replayed after any crash.
 
 A small durable workflow engine in Go. You write a workflow as ordinary Go code; the server stores an
 event-sourced history in SQLite, and workers rebuild the workflow's state by replaying that history, so a
 `kill -9` of any process loses nothing.
+
+<!-- readme-header -->
+[![CI](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml) ![Go](https://img.shields.io/badge/-Go-555) ![SQLite](https://img.shields.io/badge/-SQLite-555)
+
+| Measured | Source |
+|---|---|
+| **0 lost / 200 kill -9** | `bench/results/` |
+| **703 transitions/s** | `bench/results/` |
 
 **0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 81.7 ms per transition.**
 
