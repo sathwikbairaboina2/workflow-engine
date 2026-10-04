@@ -49,7 +49,7 @@ func TestREADMEHeadline(t *testing.T) {
 		t.Fatalf("control run must use the same seed and size: safe seed %d/%d workflows, control seed %d/%d workflows",
 			safe.Seed, safe.Workflows, control.Seed, control.Workflows)
 	}
-	want := fmt.Sprintf("**%d lost workflows and %d double-applied side effects across %d `kill -9`s (%d of the server) over %d workflows; %d activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied %d. %.0f transitions/s on SQLite (WAL, synchronous=FULL), p99 %.1f ms per transition.**",
+	want := fmt.Sprintf("**%d lost workflows and %d double-applied side effects across %d `kill -9`s (%d of the server) over %d workflows; %d activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied %d. %.0f transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 %.1f ms per transition.**",
 		safe.Lost, safe.DoubleApplied, safe.KillsTotal, safe.KillsServer, safe.Workflows, safe.ActivityReExecutions,
 		control.DoubleApplied, bench.TransitionsPerSec, bench.TransitionP99MS)
 	readme, err := os.ReadFile("README.md")

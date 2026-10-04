@@ -4,7 +4,7 @@ A small durable workflow engine in Go. You write a workflow as ordinary Go code;
 event-sourced history in SQLite, and workers rebuild the workflow's state by replaying that history, so a
 `kill -9` of any process loses nothing.
 
-**0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL), p99 81.7 ms per transition.**
+**0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 81.7 ms per transition.**
 
 Read the last number with its conditions: it was measured with the database on tmpfs, where `fsync` is nearly
 free, so it is the engine's ceiling. On this machine's Docker Desktop disk the same engine did 10
