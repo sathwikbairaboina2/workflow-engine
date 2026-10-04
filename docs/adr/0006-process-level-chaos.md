@@ -16,3 +16,11 @@ sibling containers, is dropped. The compose demo still lets a person `docker kil
 - **Exact reproduction across machines.** The seed fixes which process is killed and when, measured from
   harness start, but not which instruction it was running. Reports still record the seed.
 - **Partition and disk-full faults**: out of scope for v0.1.
+
+## Addendum 2026-10-04 (found while building)
+
+`kill -9` ends a process but leaves the kernel page cache intact, so the soak tests atomicity of
+transitions under process death, not durability across power loss. The chaos and benchmark scripts therefore
+mount `/tmp` as tmpfs by default (`WF_TMPFS=0` switches to the container disk): on Docker Desktop an fsync
+took about 160 ms, which made a 500-workflow soak run for tens of minutes without changing what it proves.
+Every result file records the filesystem it ran on (`bench-latest.json` and `bench-disk.json` show both).
