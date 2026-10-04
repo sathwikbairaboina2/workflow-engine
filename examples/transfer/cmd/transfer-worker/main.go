@@ -79,7 +79,16 @@ func runWorker(args []string, stderr io.Writer) int {
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	l, err := transfer.OpenLedger(*ledgerPath)
+	// Several workers share one ledger file and are restarted at arbitrary moments, so a first open can
+	// collide with another process's crash recovery; retry briefly before giving up.
+	var l *transfer.Ledger
+	var err error
+	for attempt := 0; attempt < 10; attempt++ {
+		if l, err = transfer.OpenLedger(*ledgerPath); err == nil {
+			break
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
 	if err != nil {
 		fmt.Fprintln(stderr, "ledger:", err)
 		return 1

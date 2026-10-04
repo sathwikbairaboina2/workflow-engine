@@ -16,7 +16,7 @@ import (
 
 // ledgerDSN matches the engine store's settings: WAL, synchronous=FULL and immediate write transactions,
 // so concurrent worker processes sharing one ledger file queue on the busy timeout instead of failing.
-const ledgerDSN = "?_pragma=journal_mode(WAL)&_pragma=synchronous(FULL)&_pragma=busy_timeout(10000)&_txlock=immediate"
+const ledgerDSN = "?_pragma=busy_timeout(10000)&_pragma=journal_mode(WAL)&_pragma=synchronous(FULL)&_txlock=immediate"
 
 const ledgerSchema = `
 CREATE TABLE IF NOT EXISTS ledger (
