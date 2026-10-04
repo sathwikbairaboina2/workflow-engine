@@ -16,7 +16,8 @@ var schemaSQL string
 
 // dsnParams are appended to the database path. _txlock=immediate makes every BeginTx a BEGIN IMMEDIATE,
 // so writers queue on busy_timeout instead of failing when a read lock upgrades (verified by prototype, ADR 0001).
-const dsnParams = "?_pragma=journal_mode(WAL)&_pragma=synchronous(FULL)&_pragma=busy_timeout(10000)&_pragma=foreign_keys(ON)&_txlock=immediate"
+// busy_timeout comes first: journal_mode and recovery after a crash take locks too, and must wait rather than fail.
+const dsnParams = "?_pragma=busy_timeout(10000)&_pragma=journal_mode(WAL)&_pragma=synchronous(FULL)&_pragma=foreign_keys(ON)&_txlock=immediate"
 
 // ErrConflict means an optimistic concurrency check failed.
 var ErrConflict = errors.New("store: concurrent modification")
@@ -28,8 +29,13 @@ var ErrDuplicateOpenRun = errors.New("store: workflow already has an open run")
 // Tests set it to panic; production leaves it nil.
 var Failpoint func(point string)
 
-// Store wraps the SQLite database.
-type Store struct{ DB *sql.DB }
+// Store wraps the SQLite database. One wfd process owns the file, so transactions queue on an in-process
+// semaphore (FIFO) before they touch SQLite: SQLite's own busy handler retries by sleeping, is not fair, and
+// starved writers for more than the busy timeout in the kill -9 soak (ADR 0001).
+type Store struct {
+	DB  *sql.DB
+	sem chan struct{}
+}
 
 // Open opens (and migrates) the database at path.
 func Open(path string) (*Store, error) {
@@ -38,7 +44,7 @@ func Open(path string) (*Store, error) {
 		return nil, fmt.Errorf("store: open: %w", err)
 	}
 	db.SetMaxOpenConns(8)
-	s := &Store{DB: db}
+	s := &Store{DB: db, sem: make(chan struct{}, 1)}
 	if err := s.migrate(); err != nil {
 		db.Close()
 		return nil, err
@@ -73,6 +79,12 @@ type Tx struct{ tx *sql.Tx }
 // WithTx runs fn in one BEGIN IMMEDIATE transaction named name. It rolls back on error or panic
 // (the panic is re-raised) and commits otherwise.
 func (s *Store) WithTx(ctx context.Context, name string, fn func(*Tx) error) (err error) {
+	select {
+	case s.sem <- struct{}{}:
+		defer func() { <-s.sem }()
+	case <-ctx.Done():
+		return fmt.Errorf("store: waiting to begin %s: %w", name, ctx.Err())
+	}
 	sqlTx, err := s.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return fmt.Errorf("store: begin %s: %w", name, err)
@@ -84,12 +96,18 @@ func (s *Store) WithTx(ctx context.Context, name string, fn func(*Tx) error) (er
 		}
 	}()
 	if err := fn(&Tx{tx: sqlTx}); err != nil {
+		if errors.Is(err, sql.ErrTxDone) && ctx.Err() != nil { // the driver rolled back because the caller went away
+			return fmt.Errorf("store: %s: %w", name, ctx.Err())
+		}
 		return err
 	}
 	if Failpoint != nil {
 		Failpoint(name + "/before_commit")
 	}
 	if err := sqlTx.Commit(); err != nil {
+		if ctx.Err() != nil { // the driver rolled the transaction back because the caller went away
+			return fmt.Errorf("store: commit %s: %w", name, ctx.Err())
+		}
 		return fmt.Errorf("store: commit %s: %w", name, err)
 	}
 	committed = true

@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -41,6 +42,11 @@ func writeErr(w http.ResponseWriter, err error) {
 			status = http.StatusInternalServerError
 		}
 		writeError(w, ce.Code, status, ce.Message, ce.RunID)
+		return
+	}
+	if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+		// The caller hung up or the server is shutting down; the transaction was rolled back, nothing leaked.
+		writeError(w, "canceled", http.StatusServiceUnavailable, "request canceled", "")
 		return
 	}
 	slog.Error("internal error", "err", err)
