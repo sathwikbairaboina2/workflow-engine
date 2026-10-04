@@ -5,7 +5,7 @@
 **0 lost workflows and 0 double-applied side effects across 200 `kill -9`s (54 of the server) over 500 workflows; 9 activity re-executions were absorbed by idempotency keys. With the keys disabled, the same seed double-applied 22. 703 transitions/s on SQLite (WAL, synchronous=FULL, database on tmpfs), p99 81.7 ms per transition.**
 
 <!-- readme-header -->
-[![CI](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml) ![Go](https://img.shields.io/badge/-Go-555) ![SQLite](https://img.shields.io/badge/-SQLite-555)
+[![CI](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sathwikbairaboina2/workflow-engine/actions/workflows/ci.yml) ![License: MIT](https://img.shields.io/badge/license-MIT-blue) ![Go](https://img.shields.io/badge/-Go-555) ![SQLite](https://img.shields.io/badge/-SQLite-555)
 
 | Measured | Source |
 |---|---|
